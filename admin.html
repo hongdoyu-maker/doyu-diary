@@ -78,9 +78,9 @@
 
     <div class="admin-dashboard-header">
         <div>
-            <p class="admin-small-title">MY LITTLE DAYS</p>
+            <p class="admin-small-title">Doyu's Diary</p>
             <h1>Diary Admin</h1>
-            <p>오늘의 작은 기억을 남겨보세요 ♡</p>
+            <p>하루를 궁금해할 도막이에게 기록 남기기</p>
         </div>
 
         <button id="logoutButton" class="logout-button">
@@ -205,11 +205,30 @@
                 SAVE DIARY ♡
             </button>
 
+                    <p
+            id="diarySaveMessage"
+            class="diary-save-message"
+        ></p>
+
         </form>
 
         <!-- ============================== -->
 <!-- 홈 화면 설정 -->
 <!-- ============================== -->
+
+        <section class="admin-diary-list-section">
+
+    <div class="admin-diary-list-header">
+        <h2>작성한 일기</h2>
+        <p>저장된 일기를 여기서 확인할 수 있어요 ♡</p>
+    </div>
+
+    <div
+        id="adminDiaryList"
+        class="admin-diary-list"
+    ></div>
+
+</section>
 
 <section class="home-settings">
 
@@ -271,25 +290,6 @@
     ></p>
 
 </section>
-
-        <section class="admin-diary-list-section">
-
-    <div class="admin-diary-list-header">
-        <h2>작성한 일기</h2>
-        <p>저장된 일기를 여기서 확인할 수 있어요 ♡</p>
-    </div>
-
-    <div
-        id="adminDiaryList"
-        class="admin-diary-list"
-    ></div>
-
-</section>
-
-        <p
-            id="diarySaveMessage"
-            class="diary-save-message"
-        ></p>
 
     </div>
 
