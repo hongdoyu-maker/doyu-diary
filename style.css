@@ -1880,10 +1880,10 @@ font-family:
     .diary-image:nth-child(3n + 1) {
         grid-column: auto;
     }
-    
+
     .hero-deco {
-        left: 22%;
-        top: 45%;
+        left: 19%;
+        top: 90%;
     }
 
     .hero-deco img {
@@ -2226,4 +2226,23 @@ font-family:
     cursor: pointer;
 
     font-size: 12px;
+}
+/* =========================
+   모바일 화면 전용 수정
+========================= */
+
+@media (max-width: 850px) {
+
+    .little-note {
+        width: 180px;
+
+        margin: 50px auto 0;
+
+        padding:
+            35px 18px
+            25px;
+
+        font-size: 24px;
+    }
+
 }
