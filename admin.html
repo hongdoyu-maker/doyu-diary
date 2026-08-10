@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>도유의 일기 · Admin</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="admin-body">
+
+<div class="admin-login" id="adminLogin">
+
+        <div class="admin-paper">
+
+            <div class="admin-snowflake">❄</div>
+
+            <p class="admin-small-title">
+                Doyu's Diary
+            </p>
+
+            <h1>Admin Diary</h1>
+
+            <p class="admin-description">
+                도막이에게 기록 남기러 가기!
+            </p>
+
+
+            <form id="loginForm">
+
+                <label for="adminEmail">
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="adminEmail"
+                    placeholder="your@email.com"
+                    required
+                >
+
+
+                <label for="adminPassword">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="adminPassword"
+                    placeholder="••••••••"
+                    required
+                >
+
+
+                <button type="submit" class="admin-login-button">
+                    LOGIN
+                </button>
+
+            </form>
+
+
+            <p id="loginMessage" class="login-message"></p>
+
+            <p class="admin-footer-text">
+                private space for little memories
+            </p>
+
+        </div>
+
+    </div>
+
+<section class="admin-dashboard" id="adminDashboard">
+
+    <div class="admin-dashboard-header">
+        <div>
+            <p class="admin-small-title">MY LITTLE DAYS</p>
+            <h1>Diary Admin</h1>
+            <p>오늘의 작은 기억을 남겨보세요 ♡</p>
+        </div>
+
+        <button id="logoutButton" class="logout-button">
+            LOGOUT
+        </button>
+    </div>
+
+    <div class="admin-editor paper">
+
+        <h2>✎ New Diary</h2>
+
+        <form id="diaryForm">
+
+            <label for="entryDate">날짜</label>
+            <input
+                type="date"
+                id="entryDate"
+                required
+            >
+
+            <label for="entryTitle">제목</label>
+            <input
+                type="text"
+                id="entryTitle"
+                placeholder="오늘의 작은 기록"
+                required
+            >
+
+            <label for="entryContent">오늘의 이야기</label>
+            <textarea
+                id="entryContent"
+                rows="12"
+                placeholder="오늘 있었던 일을 자유롭게 적어주세요."
+                required
+            ></textarea>
+
+            <div class="admin-form-row">
+
+                <div>
+                    <label for="entryMood">오늘의 기분</label>
+                    <input
+                        type="text"
+                        id="entryMood"
+                        placeholder="☁︎"
+                    >
+                </div>
+
+                <div>
+                    <label for="entrySong">오늘의 노래</label>
+                    <input
+                        type="text"
+                        id="entrySong"
+                        placeholder="Snowfall"
+                    >
+                </div>
+                <div class="block-editor-section">
+
+    <div class="block-editor-title">
+        <h3>일기 구성</h3>
+
+        <p>
+            글과 사진을 원하는 순서대로 추가해보세요 ♡
+        </p>
+    </div>
+
+    <div class="block-buttons">
+
+        <button
+            type="button"
+            id="addTextBlock"
+            class="block-add-button"
+        >
+            + 글 추가
+        </button>
+
+        <button
+            type="button"
+            id="addImageBlock"
+            class="block-add-button"
+        >
+            + 사진 추가
+        </button>
+
+    </div>
+
+    <div
+        id="contentBlockEditor"
+        class="content-block-editor"
+    ></div>
+
+</div>
+<label for="entryImages">
+    사진
+</label>
+
+<p class="image-help">
+    오늘의 사진을 자유롭게 담아주세요 ♡
+</p>
+
+<div
+    id="imagePreview"
+    class="image-preview"
+></div>
+            </div>
+
+            <label for="entryPassword">
+                일기 열람 비밀번호
+            </label>
+
+            <input
+                type="password"
+                id="entryPassword"
+                placeholder="이 일기를 열 때 사용할 비밀번호"
+                required
+            >
+
+            <button
+                type="submit"
+                class="save-diary-button"
+                id="saveDiaryButton"
+            >
+                SAVE DIARY ♡
+            </button>
+
+        </form>
+
+        <!-- ============================== -->
+<!-- 홈 화면 설정 -->
+<!-- ============================== -->
+
+<section class="home-settings">
+
+    <h2>홈 화면 꾸미기</h2>
+
+    <p class="home-settings-description">
+        메모와 플레이리스트를 수정할 수 있어요 ♡
+    </p>
+
+
+    <!-- 상단 메모 -->
+    <div class="home-setting-group">
+
+        <label for="homeMemo">
+            상단 메모
+        </label>
+
+        <textarea
+            id="homeMemo"
+            rows="6"
+            placeholder="Some days,&#10;the music is&#10;the only thing..."
+        ></textarea>
+
+    </div>
+
+
+    <!-- 플레이리스트 -->
+    <div class="home-setting-group">
+
+        <h3>Playlist</h3>
+
+        <div
+            id="playlistEditor"
+            class="playlist-editor"
+        ></div>
+
+        <button
+            type="button"
+            id="addPlaylistSong"
+            class="admin-secondary-button"
+        >
+            + 노래 추가
+        </button>
+
+    </div>
+
+
+    <button
+        type="button"
+        id="saveHomeSettings"
+        class="admin-save-button"
+    >
+        HOME 저장
+    </button>
+
+    <p
+        id="homeSettingsMessage"
+        class="admin-message"
+    ></p>
+
+</section>
+
+        <section class="admin-diary-list-section">
+
+    <div class="admin-diary-list-header">
+        <h2>작성한 일기</h2>
+        <p>저장된 일기를 여기서 확인할 수 있어요 ♡</p>
+    </div>
+
+    <div
+        id="adminDiaryList"
+        class="admin-diary-list"
+    ></div>
+
+</section>
+
+        <p
+            id="diarySaveMessage"
+            class="diary-save-message"
+        ></p>
+
+    </div>
+
+</section>
+    <script src="admin.js"></script>
+
+</body>
+</html>

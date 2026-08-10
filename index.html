@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>도유의 일기</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="page">
+
+    <header class="hero">
+
+        <div class="title-area">
+            <div class="snowflake">❄</div>
+
+            <h1>Doyu's Diary</h1>
+
+            <p>
+                방송이 없는 날<br>
+                도유는 어떤 하루를 보낼까
+            </p>
+        </div>
+
+
+<!-- 새 장식 이미지 -->
+<div class="hero-deco">
+    <img
+        src="hero-deco.png"
+        alt=""
+    >
+</div>
+
+
+
+        <div class="memo">
+            <span class="tape"></span>
+
+     <p id="homeMemoText">
+    Some days,<br>
+    the music is<br>
+    the only thing<br>
+    that gets me<br>
+    through.
+</p>
+
+            <span class="heart">✍</span>
+        </div>
+
+      <div class="cotton">
+    <img
+        src="cotton.png"
+        alt=""
+        class="cotton-image"
+    >
+</div>
+
+    </header>
+
+
+    <main class="content">
+
+        <aside class="sidebar paper">
+
+            <h2>Diary</h2>
+
+           <div
+    class="month-list"
+    id="monthList"
+></div>
+
+            <div class="little-note">
+
+                <div class="pin"></div>
+
+                <p>
+                    After the<br>
+                    Streaming ends<br>
+                    moments.
+                </p>
+
+                <span>♡</span>
+
+            </div>
+
+           <div class="pencil">
+    <img
+        src="pencil.png"
+        alt=""
+        class="pencil-image"
+    >
+</div>
+
+        </aside>
+
+
+        <section class="main-area">
+
+            <section class="calendar-card paper">
+
+                <div class="calendar-tape"></div>
+
+<p class="year" id="calendarYear">
+    ──── 2026 ────
+</p>
+
+<h2 id="calendarMonth">
+    August
+</h2>
+
+                <p class="subtitle">
+                    A record of an ordinary daily life
+                </p>
+
+
+               <div class="calendar" id="calendar">
+
+    <div class="week">SUN</div>
+    <div class="week">MON</div>
+    <div class="week">TUE</div>
+    <div class="week">WED</div>
+    <div class="week">THU</div>
+    <div class="week">FRI</div>
+    <div class="week">SAT</div>
+
+</div>
+
+
+                <div class="calendar-bottom">
+                    <span>❄</span>
+                    <em>click a date to open</em>
+                </div>
+
+            </section>
+
+
+            <section class="playlist paper">
+
+                <div class="notebook">
+      <div class="notebook">
+    <img
+        src="playlist.gif"
+        alt="Little Notes"
+        class="notebook-photo"
+    >
+</div>
+                </div>
+
+                <div class="playlist-content">
+
+                    <h2>
+                        Playlist of August
+                        <span>❄</span>
+                    </h2>
+
+                    <p class="playlist-sub">
+                        이달의 도유 픽 노래 🎧
+                    </p>
+
+
+                    <div id="homePlaylist"></div>
+
+                </div>
+
+            </section>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+
+        <span>ෆ</span>
+
+        <p>
+            오늘도 함께해 줘서 고마워요.<br>
+            도유랑 오래오래 같이 걸어가자.
+        </p>
+
+        <span>ෆ</span>
+
+    </footer>
+
+</div>
+<!-- 비밀번호 입력 창 -->
+<div class="modal" id="passwordModal">
+
+    <div class="password-box">
+
+        <button class="close-button" id="closePassword">×</button>
+
+        <div class="lock-icon">❄</div>
+
+        <p class="modal-date" id="modalDate">
+            2026.08.10
+        </p>
+
+        <h2>Private Memory</h2>
+
+        <p class="modal-message">
+            이 날의 기록을 열기 위한<br>
+            비밀번호를 입력해주세요.
+        </p>
+
+        <input
+            type="password"
+            id="passwordInput"
+            placeholder="password"
+            autocomplete="off"
+        >
+
+        <button class="open-button" id="openDiary">
+            OPEN
+        </button>
+
+        <p class="error-message" id="passwordError">
+            비밀번호가 맞지 않아요 ♡
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- 일기 화면 -->
+<div class="modal" id="diaryModal">
+
+    <div class="diary-page">
+
+        <button class="close-button" id="closeDiary">×</button>
+
+       <p class="diary-date" id="diaryDate">
+    2026 · 08 · 10
+</p>
+
+<h2 id="diaryTitle">
+    오늘의 작은 기록
+</h2>
+
+        <div class="diary-divider">
+            ❄　♡　❄
+        </div>
+
+      <p class="diary-text" id="diaryText"></p>
+
+  <div
+    id="diaryImages"
+    class="diary-images"
+></div>
+<div
+    id="diaryContentBlocks"
+    class="diary-content-blocks"
+></div>
+       <div class="diary-ending">
+
+    <span>Today's mood</span>
+    <strong id="diaryMood">☁︎</strong>
+
+    <span>Today's song</span>
+    <strong id="diarySong">♪</strong>
+
+</div>
+
+        <p class="diary-sign">
+            사랑을 담아, 도유로부터
+        </p>
+
+    </div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
