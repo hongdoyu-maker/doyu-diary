@@ -1880,7 +1880,15 @@ font-family:
     .diary-image:nth-child(3n + 1) {
         grid-column: auto;
     }
+    
+    .hero-deco {
+        left: 22%;
+        top: 45%;
+    }
 
+    .hero-deco img {
+        width: 58px;
+    }
 }/* ==============================
    CONTENT BLOCK EDITOR
 ================================= */
