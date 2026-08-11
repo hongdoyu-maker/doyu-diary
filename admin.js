@@ -198,10 +198,12 @@ for (
         // 비어 있는 글 블록은 저장하지 않음
         if (text.length > 0) {
 
-            savedContentBlocks.push({
-                type: "text",
-                content: text
-            });
+           savedContentBlocks.push({
+    type: "text",
+    content: text,
+    align:
+        block.align || "left"
+});
 
         }
 
@@ -464,33 +466,117 @@ blockElement.dataset.index = index;
 
             if (block.type === "text") {
 
-                const textarea =
-                    document.createElement(
-                        "textarea"
-                    );
+    const textarea =
+        document.createElement(
+            "textarea"
+        );
 
-                textarea.placeholder =
-                    "이 부분에 글을 적어주세요.";
+    textarea.placeholder =
+        "이 부분에 글을 적어주세요.";
 
-                textarea.value =
-                    block.content || "";
+    textarea.value =
+        block.content || "";
 
-                textarea.addEventListener(
-                    "input",
-                    function() {
+    textarea.addEventListener(
+        "input",
+        function() {
 
-                        contentBlocks[index].content =
-                            textarea.value;
+            contentBlocks[index].content =
+                textarea.value;
 
-                    }
+        }
+    );
+
+    blockElement.appendChild(
+        textarea
+    );
+
+
+    // ==============================
+    // 글 정렬 버튼
+    // ==============================
+
+    const alignActions =
+        document.createElement(
+            "div"
+        );
+
+    alignActions.className =
+        "block-align-actions";
+
+
+    const alignOptions = [
+        {
+            value: "left",
+            label: "왼쪽"
+        },
+        {
+            value: "center",
+            label: "가운데"
+        },
+        {
+            value: "right",
+            label: "오른쪽"
+        }
+    ];
+
+
+    alignOptions.forEach(
+        function(option) {
+
+            const alignButton =
+                document.createElement(
+                    "button"
                 );
 
-                blockElement.appendChild(
-                    textarea
+            alignButton.type =
+                "button";
+
+            alignButton.className =
+                "block-align-button";
+
+            alignButton.textContent =
+                option.label;
+
+
+            if (
+                (block.align || "left")
+                === option.value
+            ) {
+
+                alignButton.classList.add(
+                    "active"
                 );
 
             }
 
+
+            alignButton.addEventListener(
+                "click",
+                function() {
+
+                    contentBlocks[index].align =
+                        option.value;
+
+                    renderContentBlocks();
+
+                }
+            );
+
+
+            alignActions.appendChild(
+                alignButton
+            );
+
+        }
+    );
+
+
+    blockElement.appendChild(
+        alignActions
+    );
+
+}
 
             if (block.type === "image") {
 
@@ -1175,7 +1261,8 @@ addTextBlockButton.addEventListener(
 
         contentBlocks.push({
             type: "text",
-            content: ""
+            content: "",
+            align: "left"
         });
 
         renderContentBlocks();
@@ -1484,16 +1571,18 @@ if (
     editDiary.content_blocks.forEach(
         function(block) {
 
-            // 기존 글 블록
-            if (block.type === "text") {
+          // 기존 글 블록
+if (block.type === "text") {
 
-                contentBlocks.push({
-                    type: "text",
-                    content:
-                        block.content || ""
-                });
+    contentBlocks.push({
+        type: "text",
+        content:
+            block.content || "",
+        align:
+            block.align || "left"
+    });
 
-            }
+}
 
 
             // 기존 사진 블록

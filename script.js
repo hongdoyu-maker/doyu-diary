@@ -842,6 +842,9 @@ if (
                 text.textContent =
                     block.content || "";
 
+                    text.style.textAlign =
+    block.align || "left";
+
                 diaryContentBlocks
                     .appendChild(text);
 

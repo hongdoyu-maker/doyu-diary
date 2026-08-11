@@ -1233,6 +1233,7 @@ footer span {
     line-height: 2.15;
 
     word-break: keep-all;
+    white-space: pre-wrap;
 }
 
 
@@ -2256,4 +2257,48 @@ font-family:
     font-family:
         "DoolgiMayoGothic",
         cursive;
+}
+
+/* ==============================
+   CONTENT BLOCK TEXT ALIGN
+================================= */
+
+.block-align-actions {
+    display: flex;
+
+    gap: 8px;
+
+    margin-top: 10px;
+}
+
+.block-align-button {
+    padding:
+        6px 10px;
+
+    border:
+        1px solid
+        #d8cddd;
+
+    background:
+        #faf7fb;
+
+    color:
+        var(--soft-text);
+
+    font-family: inherit;
+
+    cursor: pointer;
+
+    font-size: 12px;
+}
+
+.block-align-button.active {
+    background:
+        rgba(199, 182, 209, 0.35);
+
+    border-color:
+        var(--lavender-dark);
+
+    color:
+        var(--lavender-dark);
 }
