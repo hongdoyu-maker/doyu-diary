@@ -2250,3 +2250,10 @@ font-family:
 .home-settings {
     margin-top: 50px;
 }
+
+#diaryMood,
+#diarySong {
+    font-family:
+        "DoolgiMayoGothic",
+        cursive;
+}
