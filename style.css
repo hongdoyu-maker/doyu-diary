@@ -1233,7 +1233,6 @@ footer span {
     line-height: 2.15;
 
     word-break: keep-all;
-    white-space: pre-wrap;
 }
 
 
@@ -1934,6 +1933,22 @@ font-family:
     margin-bottom: 20px;
 }
 
+.block-buttons-bottom {
+    margin:
+        18px 0
+        0;
+
+    padding-top: 18px;
+
+    border-top:
+        1px dashed
+        rgba(151, 130, 167, 0.35);
+}
+
+.block-buttons-bottom .block-add-button {
+    flex: 1;
+}
+
 
 .block-add-button {
     padding:
@@ -2036,7 +2051,50 @@ font-family:
     cursor: pointer;
 
     font-size: 12px;
-}/* ==============================
+}
+
+@media (max-width: 600px) {
+
+    .block-buttons {
+        gap: 8px;
+    }
+
+    .block-buttons .block-add-button {
+        flex: 1;
+
+        min-height: 44px;
+
+        padding:
+            11px 10px;
+    }
+
+    .block-buttons-bottom {
+        position: sticky;
+        bottom: 8px;
+        z-index: 10;
+
+        margin-top: 16px;
+
+        padding:
+            10px;
+
+        background:
+            rgba(250, 247, 251, 0.96);
+
+        border:
+            1px solid
+            rgba(151, 130, 167, 0.3);
+
+        box-shadow:
+            0 6px 18px
+            rgba(70, 55, 75, 0.12);
+
+        backdrop-filter: blur(6px);
+    }
+
+}
+
+/* ==============================
    DIARY CONTENT BLOCKS
 ================================= */
 
@@ -2250,55 +2308,4 @@ font-family:
 
 .home-settings {
     margin-top: 50px;
-}
-
-#diaryMood,
-#diarySong {
-    font-family:
-        "DoolgiMayoGothic",
-        cursive;
-}
-
-/* ==============================
-   CONTENT BLOCK TEXT ALIGN
-================================= */
-
-.block-align-actions {
-    display: flex;
-
-    gap: 8px;
-
-    margin-top: 10px;
-}
-
-.block-align-button {
-    padding:
-        6px 10px;
-
-    border:
-        1px solid
-        #d8cddd;
-
-    background:
-        #faf7fb;
-
-    color:
-        var(--soft-text);
-
-    font-family: inherit;
-
-    cursor: pointer;
-
-    font-size: 12px;
-}
-
-.block-align-button.active {
-    background:
-        rgba(199, 182, 209, 0.35);
-
-    border-color:
-        var(--lavender-dark);
-
-    color:
-        var(--lavender-dark);
 }

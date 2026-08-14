@@ -59,11 +59,14 @@ const adminLogin =
 const adminDashboard =
     document.getElementById("adminDashboard");
 
-const addTextBlockButton =
-    document.getElementById("addTextBlock");
+const addTextBlockButtons =
+    document.querySelectorAll("[data-add-text-block]");
 
-const addImageBlockButton =
-    document.getElementById("addImageBlock");
+const addImageBlockButtons =
+    document.querySelectorAll("[data-add-image-block]");
+
+const bottomBlockButtons =
+    document.getElementById("bottomBlockButtons");
 
     const adminDiaryList =
     document.getElementById(
@@ -198,12 +201,10 @@ for (
         // 비어 있는 글 블록은 저장하지 않음
         if (text.length > 0) {
 
-           savedContentBlocks.push({
-    type: "text",
-    content: text,
-    align:
-        block.align || "left"
-});
+            savedContentBlocks.push({
+                type: "text",
+                content: text
+            });
 
         }
 
@@ -466,117 +467,33 @@ blockElement.dataset.index = index;
 
             if (block.type === "text") {
 
-    const textarea =
-        document.createElement(
-            "textarea"
-        );
+                const textarea =
+                    document.createElement(
+                        "textarea"
+                    );
 
-    textarea.placeholder =
-        "이 부분에 글을 적어주세요.";
+                textarea.placeholder =
+                    "이 부분에 글을 적어주세요.";
 
-    textarea.value =
-        block.content || "";
+                textarea.value =
+                    block.content || "";
 
-    textarea.addEventListener(
-        "input",
-        function() {
+                textarea.addEventListener(
+                    "input",
+                    function() {
 
-            contentBlocks[index].content =
-                textarea.value;
+                        contentBlocks[index].content =
+                            textarea.value;
 
-        }
-    );
-
-    blockElement.appendChild(
-        textarea
-    );
-
-
-    // ==============================
-    // 글 정렬 버튼
-    // ==============================
-
-    const alignActions =
-        document.createElement(
-            "div"
-        );
-
-    alignActions.className =
-        "block-align-actions";
-
-
-    const alignOptions = [
-        {
-            value: "left",
-            label: "왼쪽"
-        },
-        {
-            value: "center",
-            label: "가운데"
-        },
-        {
-            value: "right",
-            label: "오른쪽"
-        }
-    ];
-
-
-    alignOptions.forEach(
-        function(option) {
-
-            const alignButton =
-                document.createElement(
-                    "button"
+                    }
                 );
 
-            alignButton.type =
-                "button";
-
-            alignButton.className =
-                "block-align-button";
-
-            alignButton.textContent =
-                option.label;
-
-
-            if (
-                (block.align || "left")
-                === option.value
-            ) {
-
-                alignButton.classList.add(
-                    "active"
+                blockElement.appendChild(
+                    textarea
                 );
 
             }
 
-
-            alignButton.addEventListener(
-                "click",
-                function() {
-
-                    contentBlocks[index].align =
-                        option.value;
-
-                    renderContentBlocks();
-
-                }
-            );
-
-
-            alignActions.appendChild(
-                alignButton
-            );
-
-        }
-    );
-
-
-    blockElement.appendChild(
-        alignActions
-    );
-
-}
 
             if (block.type === "image") {
 
@@ -1255,83 +1172,117 @@ saveHomeSettingsButton.addEventListener(
     }
 );
 
-addTextBlockButton.addEventListener(
-    "click",
-    function() {
+addTextBlockButtons.forEach(
+    function(button) {
 
-        contentBlocks.push({
-            type: "text",
-            content: "",
-            align: "left"
-        });
+        button.addEventListener(
+            "click",
+            function() {
 
-        renderContentBlocks();
+                contentBlocks.push({
+                    type: "text",
+                    content: ""
+                });
+
+                renderContentBlocks();
+
+                const newTextarea =
+                    contentBlockEditor.querySelector(
+                        ".content-block:last-child textarea"
+                    );
+
+                if (newTextarea) {
+                    newTextarea.focus({
+                        preventScroll: true
+                    });
+
+                    newTextarea.scrollIntoView({
+                        behavior: "smooth",
+                        block: "nearest"
+                    });
+                }
+
+            }
+        );
 
     }
 );
-addImageBlockButton.addEventListener(
-    "click",
-    function() {
+addImageBlockButtons.forEach(
+    function(button) {
 
-        const input =
-            document.createElement(
-                "input"
-            );
+        button.addEventListener(
+            "click",
+            function() {
 
-        input.type =
-            "file";
-
-        input.accept =
-            "image/jpeg,image/png,image/webp";
-
-        // 여러 장 선택 가능
-        input.multiple =
-            true;
-
-
-        input.addEventListener(
-            "change",
-            function(event) {
-
-                const files =
-                    Array.from(
-                        event.target.files
+                const input =
+                    document.createElement(
+                        "input"
                     );
 
+                input.type =
+                    "file";
 
-                if (files.length === 0) {
-                    return;
-                }
+                input.accept =
+                    "image/jpeg,image/png,image/webp";
+
+                // 여러 장 선택 가능
+                input.multiple =
+                    true;
 
 
-                files.forEach(
-                    function(file) {
+                input.addEventListener(
+                    "change",
+                    function(event) {
 
-                        const previewUrl =
-                            URL.createObjectURL(
-                                file
+                        const files =
+                            Array.from(
+                                event.target.files
                             );
 
 
-                        contentBlocks.push({
-                            type: "image",
-                            file: file,
-                            previewUrl:
-                                previewUrl,
-                            path: null
-                        });
+                        if (files.length === 0) {
+                            return;
+                        }
+
+
+                        files.forEach(
+                            function(file) {
+
+                                const previewUrl =
+                                    URL.createObjectURL(
+                                        file
+                                    );
+
+
+                                contentBlocks.push({
+                                    type: "image",
+                                    file: file,
+                                    previewUrl:
+                                        previewUrl,
+                                    path: null
+                                });
+
+                            }
+                        );
+
+
+                        renderContentBlocks();
+
+                        if (bottomBlockButtons) {
+                            bottomBlockButtons.scrollIntoView({
+                                behavior: "smooth",
+                                block: "nearest"
+                            });
+                        }
 
                     }
                 );
 
 
-                renderContentBlocks();
+                input.click();
 
             }
         );
-
-
-        input.click();
 
     }
 );
@@ -1571,18 +1522,16 @@ if (
     editDiary.content_blocks.forEach(
         function(block) {
 
-          // 기존 글 블록
-if (block.type === "text") {
+            // 기존 글 블록
+            if (block.type === "text") {
 
-    contentBlocks.push({
-        type: "text",
-        content:
-            block.content || "",
-        align:
-            block.align || "left"
-    });
+                contentBlocks.push({
+                    type: "text",
+                    content:
+                        block.content || ""
+                });
 
-}
+            }
 
 
             // 기존 사진 블록

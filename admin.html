@@ -152,6 +152,7 @@
             type="button"
             id="addTextBlock"
             class="block-add-button"
+            data-add-text-block
         >
             + 글 추가
         </button>
@@ -160,6 +161,7 @@
             type="button"
             id="addImageBlock"
             class="block-add-button"
+            data-add-image-block
         >
             + 사진 추가
         </button>
@@ -170,6 +172,30 @@
         id="contentBlockEditor"
         class="content-block-editor"
     ></div>
+
+    <div
+        id="bottomBlockButtons"
+        class="block-buttons block-buttons-bottom"
+        aria-label="일기 내용 추가"
+    >
+
+        <button
+            type="button"
+            class="block-add-button"
+            data-add-text-block
+        >
+            + 글 추가
+        </button>
+
+        <button
+            type="button"
+            class="block-add-button"
+            data-add-image-block
+        >
+            + 사진 추가
+        </button>
+
+    </div>
 
 </div>
 <label for="entryImages">
