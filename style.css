@@ -1352,6 +1352,42 @@ footer span {
         font-size: 14px;
 }
 
+.diary-back-to-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 44px;
+    margin: 34px auto 0;
+    padding: 11px 22px;
+
+    border: 1px solid rgba(151, 130, 167, 0.35);
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.58);
+    color: var(--lavender-dark);
+
+    font-family: inherit;
+    font-size: 13px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s,
+        transform 0.2s;
+}
+
+.diary-back-to-top:hover,
+.diary-back-to-top:focus-visible {
+    background: rgba(199, 182, 209, 0.2);
+    transform: translateY(-2px);
+}
+
+.diary-back-to-top span {
+    font-size: 16px;
+}
+
 .diary-comments {
     margin-top: 48px;
     padding-top: 34px;
@@ -1480,6 +1516,39 @@ footer span {
     font-size: 11px;
 
     cursor: pointer;
+}
+
+.diary-modal-close {
+    position: fixed;
+    top: max(calc(5vh + 12px), calc(env(safe-area-inset-top) + 12px));
+    right: max(20px, calc((100vw - 680px) / 2 + 18px));
+    z-index: 5;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 46px;
+    height: 46px;
+    padding: 0 0 3px;
+
+    border: 1px solid rgba(151, 130, 167, 0.32);
+    border-radius: 50%;
+
+    background: rgba(252, 250, 247, 0.94);
+    box-shadow: 0 7px 20px rgba(60, 48, 65, 0.18);
+    color: var(--soft-text);
+
+    font-size: 30px;
+    line-height: 1;
+
+    touch-action: manipulation;
+}
+
+.diary-modal-close:hover,
+.diary-modal-close:focus-visible {
+    background: white;
+    color: var(--lavender-dark);
 }
 
 .diary-comment-item > p {
@@ -1718,6 +1787,26 @@ footer span {
     .diary-page {
         padding:
             55px 30px;
+    }
+
+    .diary-modal-close {
+        top: max(12px, calc(env(safe-area-inset-top) + 8px));
+        right: max(12px, calc(env(safe-area-inset-right) + 8px));
+
+        width: 48px;
+        height: 48px;
+
+        border-color: rgba(255, 255, 255, 0.4);
+        background: rgba(52, 48, 56, 0.9);
+        color: white;
+
+        box-shadow: 0 7px 22px rgba(25, 20, 28, 0.3);
+    }
+
+    .diary-back-to-top {
+        width: 100%;
+        min-height: 48px;
+        margin-top: 30px;
     }
 
     .diary-photo {

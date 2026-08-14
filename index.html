@@ -62,7 +62,7 @@
         </style>
     </noscript>
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=20260814-diary-navigation">
 </head>
 
 <body>
@@ -284,9 +284,14 @@
 <!-- 일기 화면 -->
 <div class="modal" id="diaryModal">
 
-    <div class="diary-page">
+    <button
+        type="button"
+        class="close-button diary-modal-close"
+        id="closeDiary"
+        aria-label="일기 닫기"
+    >×</button>
 
-        <button class="close-button" id="closeDiary">×</button>
+    <div class="diary-page">
 
        <p class="diary-date" id="diaryDate">
     2026 · 08 · 10
@@ -421,6 +426,15 @@
 
         </section>
 
+        <button
+            type="button"
+            class="diary-back-to-top"
+            id="diaryBackToTop"
+        >
+            <span aria-hidden="true">↑</span>
+            맨 위로
+        </button>
+
     </div>
 
 </div>
@@ -486,7 +500,7 @@
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="script.js?v=20260814-comment-auth-fix"></script>
+<script src="script.js?v=20260814-diary-navigation"></script>
 
 </body>
 </html>

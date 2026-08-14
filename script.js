@@ -99,6 +99,12 @@ const diaryModal =
 const closeDiaryButton =
     document.getElementById("closeDiary");
 
+const diaryPage =
+    document.querySelector("#diaryModal .diary-page");
+
+const diaryBackToTopButton =
+    document.getElementById("diaryBackToTop");
+
 const diaryDate =
     document.getElementById("diaryDate");
 
@@ -1597,6 +1603,9 @@ diaryModal.classList.add(
     "show"
 );
 
+diaryPage.scrollTop =
+    0;
+
 loadDiaryComments();
 
     }
@@ -1643,6 +1652,25 @@ closeDiaryButton.addEventListener(
         );
 
         resetDiaryComments();
+
+    }
+);
+
+diaryBackToTopButton.addEventListener(
+    "click",
+    function() {
+
+        const reduceMotion =
+            window.matchMedia(
+                "(prefers-reduced-motion: reduce)"
+            ).matches;
+
+        diaryPage.scrollTo({
+            top: 0,
+            behavior: reduceMotion
+                ? "auto"
+                : "smooth"
+        });
 
     }
 );
