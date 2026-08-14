@@ -1232,7 +1232,11 @@ footer span {
 
     line-height: 2.15;
 
+    white-space: pre-wrap;
+
     word-break: keep-all;
+
+    overflow-wrap: anywhere;
 }
 
 
@@ -1283,12 +1287,14 @@ footer span {
     display: grid;
 
     grid-template-columns:
-        1fr auto;
+        minmax(0, 1fr)
+        minmax(0, 1fr);
 
     gap: 12px;
 
     font-family:
-        "Segoe Print",
+        "YleeMemoriesNeverSleep",
+        "DoolgiMayoGothic",
         cursive;
 }
 
@@ -1298,6 +1304,17 @@ footer span {
         var(--lavender-dark);
 
     font-weight: 400;
+
+    font-family:
+        "DoolgiMayoGothic",
+        sans-serif;
+
+    text-align: right;
+
+    overflow-wrap:
+        anywhere;
+
+    min-width: 0;
 }
 
 
@@ -1333,6 +1350,14 @@ footer span {
 
     .diary-photo {
         height: 200px;
+    }
+
+    .diary-ending {
+        padding:
+            20px;
+
+        gap:
+            10px 12px;
     }
 
 }/* ==================================
@@ -2116,6 +2141,9 @@ font-family:
 
     word-break:
         keep-all;
+
+    overflow-wrap:
+        anywhere;
 }
 
 
