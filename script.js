@@ -114,6 +114,33 @@ const diaryMood =
 const diarySong =
     document.getElementById("diarySong");
 
+const diaryCommentList =
+    document.getElementById("diaryCommentList");
+
+const diaryCommentCount =
+    document.getElementById("diaryCommentCount");
+
+const diaryCommentForm =
+    document.getElementById("diaryCommentForm");
+
+const commentNickname =
+    document.getElementById("commentNickname");
+
+const commentDeletePassword =
+    document.getElementById("commentDeletePassword");
+
+const commentBody =
+    document.getElementById("commentBody");
+
+const commentCharacterCount =
+    document.getElementById("commentCharacterCount");
+
+const submitDiaryCommentButton =
+    document.getElementById("submitDiaryComment");
+
+const diaryCommentMessage =
+    document.getElementById("diaryCommentMessage");
+
 // ==============================
 // 월 이름
 // ==============================
@@ -144,6 +171,561 @@ let currentMonth;
 
 // 현재 선택한 일기 날짜
 let selectedDate = null;
+
+let openedDiaryPassword =
+    "";
+
+function getCommentClientToken() {
+
+    const storageKey =
+        "mydiary-comment-client";
+
+    try {
+
+        let token =
+            localStorage.getItem(
+                storageKey
+            );
+
+        if (!token) {
+
+            token =
+                window.crypto &&
+                window.crypto.randomUUID
+                    ? window.crypto.randomUUID()
+                    : `${Date.now()}-${Math.random()}-${Math.random()}`;
+
+            localStorage.setItem(
+                storageKey,
+                token
+            );
+
+        }
+
+        return token;
+
+    } catch (error) {
+
+        return `${Date.now()}-${Math.random()}-${Math.random()}`;
+
+    }
+
+}
+
+function getCommentErrorMessage(error) {
+
+    const message =
+        error && error.message
+            ? error.message
+            : "";
+
+    if (
+        message.includes(
+            "comment_rate_limited"
+        )
+    ) {
+        return "댓글은 15초에 한 번 작성할 수 있어요.";
+    }
+
+    if (
+        message.includes(
+            "invalid_comment_delete_password"
+        )
+    ) {
+        return "삭제 비밀번호가 맞지 않아요.";
+    }
+
+    if (
+        message.includes(
+            "invalid_diary_password"
+        )
+    ) {
+        return "일기를 다시 열어주세요.";
+    }
+
+    if (
+        message.includes(
+            "Could not find the function"
+        ) ||
+        message.includes(
+            "schema cache"
+        )
+    ) {
+        return "댓글 기능 설정이 아직 완료되지 않았어요.";
+    }
+
+    return "잠시 후 다시 시도해주세요.";
+
+}
+
+function formatCommentDate(dateString) {
+
+    const date =
+        new Date(dateString);
+
+    if (Number.isNaN(date.getTime())) {
+        return "";
+    }
+
+    return date.toLocaleString(
+        "ko-KR",
+        {
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+function createCommentDeleteForm(comment) {
+
+    const form =
+        document.createElement("form");
+
+    form.className =
+        "comment-delete-form";
+
+    form.hidden =
+        true;
+
+    const input =
+        document.createElement("input");
+
+    input.type =
+        "password";
+
+    input.minLength =
+        4;
+
+    input.maxLength =
+        30;
+
+    input.placeholder =
+        "삭제 비밀번호";
+
+    input.autocomplete =
+        "current-password";
+
+    input.required =
+        true;
+
+    input.setAttribute(
+        "aria-label",
+        "댓글 삭제 비밀번호"
+    );
+
+    const confirmButton =
+        document.createElement("button");
+
+    confirmButton.type =
+        "submit";
+
+    confirmButton.textContent =
+        "삭제 확인";
+
+    const cancelButton =
+        document.createElement("button");
+
+    cancelButton.type =
+        "button";
+
+    cancelButton.textContent =
+        "취소";
+
+    const message =
+        document.createElement("span");
+
+    message.className =
+        "comment-delete-message";
+
+    cancelButton.addEventListener(
+        "click",
+        function() {
+            form.hidden = true;
+            input.value = "";
+            message.textContent = "";
+        }
+    );
+
+    form.addEventListener(
+        "submit",
+        async function(event) {
+
+            event.preventDefault();
+
+            confirmButton.disabled =
+                true;
+
+            message.textContent =
+                "삭제 중...";
+
+            const {
+                error
+            } = await supabaseClient.rpc(
+                "delete_diary_comment",
+                {
+                    comment_id:
+                        comment.comment_id,
+                    requested_date:
+                        selectedDate,
+                    supplied_password:
+                        openedDiaryPassword,
+                    comment_delete_password:
+                        input.value
+                }
+            );
+
+            confirmButton.disabled =
+                false;
+
+            if (error) {
+                message.textContent =
+                    getCommentErrorMessage(
+                        error
+                    );
+                return;
+            }
+
+            await loadDiaryComments();
+
+        }
+    );
+
+    form.appendChild(input);
+    form.appendChild(confirmButton);
+    form.appendChild(cancelButton);
+    form.appendChild(message);
+
+    return form;
+
+}
+
+function renderDiaryComments(comments) {
+
+    diaryCommentList.innerHTML =
+        "";
+
+    diaryCommentCount.textContent =
+        String(comments.length);
+
+    if (comments.length === 0) {
+
+        const empty =
+            document.createElement("p");
+
+        empty.className =
+            "diary-comment-empty";
+
+        empty.textContent =
+            "아직 댓글이 없어요. 첫 메시지를 남겨주세요 ♡";
+
+        diaryCommentList.appendChild(
+            empty
+        );
+
+        return;
+
+    }
+
+    comments.forEach(
+        function(comment) {
+
+            const item =
+                document.createElement(
+                    "article"
+                );
+
+            item.className =
+                "diary-comment-item";
+
+            const header =
+                document.createElement(
+                    "div"
+                );
+
+            header.className =
+                "diary-comment-meta";
+
+            const nickname =
+                document.createElement(
+                    "strong"
+                );
+
+            nickname.textContent =
+                comment.nickname;
+
+            const time =
+                document.createElement(
+                    "time"
+                );
+
+            time.dateTime =
+                comment.created_at;
+
+            time.textContent =
+                formatCommentDate(
+                    comment.created_at
+                );
+
+            const deleteButton =
+                document.createElement(
+                    "button"
+                );
+
+            deleteButton.type =
+                "button";
+
+            deleteButton.className =
+                "diary-comment-delete-toggle";
+
+            deleteButton.textContent =
+                "삭제";
+
+            header.appendChild(nickname);
+            header.appendChild(time);
+            header.appendChild(
+                deleteButton
+            );
+
+            const body =
+                document.createElement("p");
+
+            body.textContent =
+                comment.body;
+
+            const deleteForm =
+                createCommentDeleteForm(
+                    comment
+                );
+
+            deleteButton.addEventListener(
+                "click",
+                function() {
+
+                    deleteForm.hidden =
+                        !deleteForm.hidden;
+
+                    if (!deleteForm.hidden) {
+                        deleteForm
+                            .querySelector("input")
+                            .focus();
+                    }
+
+                }
+            );
+
+            item.appendChild(header);
+            item.appendChild(body);
+            item.appendChild(deleteForm);
+
+            diaryCommentList.appendChild(
+                item
+            );
+
+        }
+    );
+
+}
+
+async function loadDiaryComments() {
+
+    if (
+        !selectedDate ||
+        !openedDiaryPassword
+    ) {
+        return;
+    }
+
+    diaryCommentList.textContent =
+        "댓글을 불러오는 중...";
+
+    const {
+        data,
+        error
+    } = await supabaseClient.rpc(
+        "get_diary_comments",
+        {
+            requested_date:
+                selectedDate,
+            supplied_password:
+                openedDiaryPassword
+        }
+    );
+
+    if (error) {
+
+        console.error(
+            "댓글 불러오기 오류:",
+            error
+        );
+
+        diaryCommentList.textContent =
+            getCommentErrorMessage(
+                error
+            );
+
+        diaryCommentCount.textContent =
+            "0";
+
+        return;
+
+    }
+
+    renderDiaryComments(
+        Array.isArray(data)
+            ? data
+            : []
+    );
+
+}
+
+function resetDiaryComments() {
+
+    openedDiaryPassword =
+        "";
+
+    diaryCommentList.innerHTML =
+        "";
+
+    diaryCommentCount.textContent =
+        "0";
+
+    commentBody.value =
+        "";
+
+    commentDeletePassword.value =
+        "";
+
+    commentCharacterCount.textContent =
+        "0 / 500";
+
+    diaryCommentMessage.textContent =
+        "";
+
+}
+
+commentBody.addEventListener(
+    "input",
+    function() {
+
+        commentCharacterCount.textContent =
+            `${commentBody.value.length} / 500`;
+
+    }
+);
+
+diaryCommentForm.addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+        const nickname =
+            commentNickname.value.trim();
+
+        const body =
+            commentBody.value.trim();
+
+        const deletePassword =
+            commentDeletePassword.value;
+
+        if (
+            nickname.length === 0 ||
+            body.length === 0 ||
+            deletePassword.length < 4
+        ) {
+            diaryCommentMessage.textContent =
+                "닉네임, 댓글, 삭제 비밀번호를 확인해주세요.";
+            return;
+        }
+
+        submitDiaryCommentButton.disabled =
+            true;
+
+        submitDiaryCommentButton.textContent =
+            "등록 중...";
+
+        diaryCommentMessage.textContent =
+            "";
+
+        const {
+            error
+        } = await supabaseClient.rpc(
+            "create_diary_comment",
+            {
+                requested_date:
+                    selectedDate,
+                supplied_password:
+                    openedDiaryPassword,
+                comment_nickname:
+                    nickname,
+                comment_body:
+                    body,
+                comment_delete_password:
+                    deletePassword,
+                client_token:
+                    getCommentClientToken()
+            }
+        );
+
+        submitDiaryCommentButton.disabled =
+            false;
+
+        submitDiaryCommentButton.textContent =
+            "댓글 남기기";
+
+        if (error) {
+
+            console.error(
+                "댓글 등록 오류:",
+                error
+            );
+
+            diaryCommentMessage.textContent =
+                getCommentErrorMessage(
+                    error
+                );
+
+            return;
+
+        }
+
+        try {
+            localStorage.setItem(
+                "mydiary-comment-nickname",
+                nickname
+            );
+        } catch (storageError) {
+            // 저장이 막힌 브라우저에서는 닉네임 기억을 생략합니다.
+        }
+
+        commentBody.value =
+            "";
+
+        commentDeletePassword.value =
+            "";
+
+        commentCharacterCount.textContent =
+            "0 / 500";
+
+        diaryCommentMessage.textContent =
+            "댓글이 등록되었어요 ♡";
+
+        await loadDiaryComments();
+
+    }
+);
+
+try {
+    commentNickname.value =
+        localStorage.getItem(
+            "mydiary-comment-nickname"
+        ) || "";
+} catch (storageError) {
+    // 저장이 막힌 브라우저에서는 닉네임 기억을 생략합니다.
+}
 
 // ==============================
 // 일기 날짜 가져오기
@@ -995,6 +1577,11 @@ diaryModal.classList.add(
     "show"
 );
 
+openedDiaryPassword =
+    password;
+
+loadDiaryComments();
+
     }
 );
 // Enter 키로도 OPEN
@@ -1035,6 +1622,8 @@ closeDiaryButton.addEventListener(
             "show"
         );
 
+        resetDiaryComments();
+
     }
 );
 
@@ -1048,6 +1637,8 @@ diaryModal.addEventListener(
             diaryModal.classList.remove(
                 "show"
             );
+
+            resetDiaryComments();
 
         }
 

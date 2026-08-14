@@ -51,6 +51,7 @@ adminLogin.style.display = "none";
 adminDashboard.classList.add("show");
     console.log("로그인한 사용자:", data.user);
 loadAdminDiaryList();
+loadAdminComments();
     await loadHomeSettings();
 });
 const adminLogin =
@@ -86,6 +87,16 @@ const clearPhotoSelectionButton =
     const adminDiaryList =
     document.getElementById(
         "adminDiaryList"
+    );
+
+const adminCommentList =
+    document.getElementById(
+        "adminCommentList"
+    );
+
+const refreshAdminCommentsButton =
+    document.getElementById(
+        "refreshAdminComments"
     );
 
 const contentBlockEditor =
@@ -2150,3 +2161,245 @@ renderContentBlocks();
     );
 
 }
+
+function formatAdminCommentDate(
+    dateString
+) {
+
+    const date =
+        new Date(dateString);
+
+    if (Number.isNaN(date.getTime())) {
+        return "";
+    }
+
+    return date.toLocaleString(
+        "ko-KR",
+        {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+async function loadAdminComments() {
+
+    if (!adminCommentList) {
+        return;
+    }
+
+    adminCommentList.textContent =
+        "댓글을 불러오는 중...";
+
+    refreshAdminCommentsButton.disabled =
+        true;
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .from("diary_comments")
+        .select(
+            "id, diary_date, nickname, body, created_at"
+        )
+        .order(
+            "created_at",
+            {
+                ascending: false
+            }
+        )
+        .limit(200);
+
+    refreshAdminCommentsButton.disabled =
+        false;
+
+    if (error) {
+
+        console.error(
+            "관리자 댓글 목록 오류:",
+            error
+        );
+
+        adminCommentList.textContent =
+            "댓글 기능 설치 후 목록이 표시돼요.";
+
+        return;
+
+    }
+
+    adminCommentList.innerHTML =
+        "";
+
+    if (
+        !data ||
+        data.length === 0
+    ) {
+        adminCommentList.textContent =
+            "아직 등록된 댓글이 없어요.";
+        return;
+    }
+
+    data.forEach(
+        function(comment) {
+
+            const item =
+                document.createElement(
+                    "article"
+                );
+
+            item.className =
+                "admin-comment-item";
+
+            const content =
+                document.createElement(
+                    "div"
+                );
+
+            content.className =
+                "admin-comment-content";
+
+            const meta =
+                document.createElement(
+                    "div"
+                );
+
+            meta.className =
+                "admin-comment-meta";
+
+            const date =
+                document.createElement(
+                    "strong"
+                );
+
+            date.textContent =
+                comment.diary_date
+                    .replaceAll(
+                        "-",
+                        " · "
+                    );
+
+            const nickname =
+                document.createElement(
+                    "span"
+                );
+
+            nickname.textContent =
+                comment.nickname;
+
+            const time =
+                document.createElement(
+                    "time"
+                );
+
+            time.dateTime =
+                comment.created_at;
+
+            time.textContent =
+                formatAdminCommentDate(
+                    comment.created_at
+                );
+
+            meta.appendChild(date);
+            meta.appendChild(nickname);
+            meta.appendChild(time);
+
+            const body =
+                document.createElement("p");
+
+            body.textContent =
+                comment.body;
+
+            content.appendChild(meta);
+            content.appendChild(body);
+
+            const deleteButton =
+                document.createElement(
+                    "button"
+                );
+
+            deleteButton.type =
+                "button";
+
+            deleteButton.className =
+                "admin-diary-action-button";
+
+            deleteButton.textContent =
+                "삭제";
+
+            deleteButton.addEventListener(
+                "click",
+                async function() {
+
+                    const confirmed =
+                        window.confirm(
+                            "이 댓글을 삭제할까요?"
+                        );
+
+                    if (!confirmed) {
+                        return;
+                    }
+
+                    deleteButton.disabled =
+                        true;
+
+                    deleteButton.textContent =
+                        "삭제 중...";
+
+                    const {
+                        error: deleteError
+                    } = await supabaseClient
+                        .from("diary_comments")
+                        .delete()
+                        .eq(
+                            "id",
+                            comment.id
+                        );
+
+                    if (deleteError) {
+
+                        console.error(
+                            "관리자 댓글 삭제 오류:",
+                            deleteError
+                        );
+
+                        window.alert(
+                            "댓글을 삭제하지 못했어요."
+                        );
+
+                        deleteButton.disabled =
+                            false;
+
+                        deleteButton.textContent =
+                            "삭제";
+
+                        return;
+
+                    }
+
+                    await loadAdminComments();
+
+                }
+            );
+
+            item.appendChild(content);
+            item.appendChild(
+                deleteButton
+            );
+
+            adminCommentList.appendChild(
+                item
+            );
+
+        }
+    );
+
+}
+
+refreshAdminCommentsButton.addEventListener(
+    "click",
+    loadAdminComments
+);

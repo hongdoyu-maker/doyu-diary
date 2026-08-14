@@ -324,6 +324,103 @@
             사랑을 담아, 도유로부터
         </p>
 
+        <section
+            class="diary-comments"
+            aria-labelledby="diaryCommentsTitle"
+        >
+
+            <div class="diary-comments-header">
+                <div>
+                    <p>Little messages</p>
+                    <h3 id="diaryCommentsTitle">
+                        댓글
+                    </h3>
+                </div>
+
+                <span id="diaryCommentCount">
+                    0
+                </span>
+            </div>
+
+            <div
+                id="diaryCommentList"
+                class="diary-comment-list"
+                aria-live="polite"
+            ></div>
+
+            <form
+                id="diaryCommentForm"
+                class="diary-comment-form"
+            >
+
+                <div class="diary-comment-form-row">
+                    <div>
+                        <label for="commentNickname">
+                            닉네임
+                        </label>
+
+                        <input
+                            type="text"
+                            id="commentNickname"
+                            maxlength="20"
+                            autocomplete="nickname"
+                            placeholder="이름"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label for="commentDeletePassword">
+                            삭제 비밀번호
+                        </label>
+
+                        <input
+                            type="password"
+                            id="commentDeletePassword"
+                            minlength="4"
+                            maxlength="30"
+                            autocomplete="new-password"
+                            placeholder="4자 이상"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <label for="commentBody">
+                    댓글
+                </label>
+
+                <textarea
+                    id="commentBody"
+                    rows="4"
+                    maxlength="500"
+                    placeholder="도유에게 작은 메시지를 남겨주세요 ♡"
+                    required
+                ></textarea>
+
+                <div class="diary-comment-form-footer">
+                    <span id="commentCharacterCount">
+                        0 / 500
+                    </span>
+
+                    <button
+                        type="submit"
+                        id="submitDiaryComment"
+                    >
+                        댓글 남기기
+                    </button>
+                </div>
+
+                <p
+                    id="diaryCommentMessage"
+                    class="diary-comment-message"
+                    aria-live="polite"
+                ></p>
+
+            </form>
+
+        </section>
+
     </div>
 
 </div>
