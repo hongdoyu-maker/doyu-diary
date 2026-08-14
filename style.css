@@ -259,6 +259,30 @@ position: relative;
     white-space: pre-line;
 }
 
+.memo p.is-loading {
+    visibility: hidden;
+
+    opacity: 0;
+}
+
+.memo p.is-ready {
+    visibility: visible;
+
+    opacity: 1;
+
+    transition:
+        opacity 180ms
+        ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .memo p.is-ready {
+        transition: none;
+    }
+
+}
+
 
 .memo .heart {
     font-size: 25px;

@@ -28,6 +28,36 @@ const diaryImages =
         "homeMemoText"
     );
 
+const defaultHomeMemo =
+    "Some days,\n" +
+    "the music is\n" +
+    "the only thing\n" +
+    "that gets me\n" +
+    "through.";
+
+function showHomeMemo(memoText) {
+
+    if (!homeMemoText) {
+        return;
+    }
+
+    homeMemoText.textContent =
+        memoText || defaultHomeMemo;
+
+    homeMemoText.classList.remove(
+        "is-loading"
+    );
+
+    homeMemoText.classList.add(
+        "is-ready"
+    );
+
+    homeMemoText.removeAttribute(
+        "aria-busy"
+    );
+
+}
+
 const homePlaylist =
     document.getElementById(
         "homePlaylist"
@@ -207,6 +237,10 @@ async function loadHomeSettings() {
             error
         );
 
+        showHomeMemo(
+            defaultHomeMemo
+        );
+
         return;
     }
 
@@ -215,15 +249,9 @@ async function loadHomeSettings() {
     // 상단 메모
     // ==============================
 
-    if (
-        homeMemoText &&
+    showHomeMemo(
         data.memo_text
-    ) {
-
-        homeMemoText.textContent =
-            data.memo_text;
-
-    }
+    );
 
 
     // ==============================
@@ -841,9 +869,6 @@ if (
 
                 text.textContent =
                     block.content || "";
-
-                    text.style.textAlign =
-    block.align || "left";
 
                 diaryContentBlocks
                     .appendChild(text);
