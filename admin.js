@@ -68,6 +68,21 @@ const addImageBlockButtons =
 const bottomBlockButtons =
     document.getElementById("bottomBlockButtons");
 
+const photoSelectionToolbar =
+    document.getElementById("photoSelectionToolbar");
+
+const selectedPhotoCount =
+    document.getElementById("selectedPhotoCount");
+
+const photoMoveGuide =
+    document.getElementById("photoMoveGuide");
+
+const moveSelectedPhotosButton =
+    document.getElementById("moveSelectedPhotos");
+
+const clearPhotoSelectionButton =
+    document.getElementById("clearPhotoSelection");
+
     const adminDiaryList =
     document.getElementById(
         "adminDiaryList"
@@ -77,6 +92,12 @@ const contentBlockEditor =
     document.getElementById("contentBlockEditor");
 
 let contentBlocks = [];
+
+const selectedImageBlocks =
+    new Set();
+
+let isPhotoMoveMode =
+    false;
 
 let editingDate = null;
 
@@ -423,6 +444,10 @@ contentBlocks.forEach(
 
 contentBlocks = [];
 
+selectedImageBlocks.clear();
+isPhotoMoveMode = false;
+updatePhotoSelectionToolbar();
+
 // 수정 모드 종료
 editingDate = null;
 
@@ -447,13 +472,215 @@ await loadAdminDiaryList();
 
     }
 )
+
+function updatePhotoSelectionToolbar() {
+
+    const selectedCount =
+        selectedImageBlocks.size;
+
+    const hasSelection =
+        selectedCount > 0;
+
+    if (!hasSelection) {
+        isPhotoMoveMode = false;
+    }
+
+    photoSelectionToolbar.hidden =
+        !hasSelection;
+
+    selectedPhotoCount.textContent =
+        `${selectedCount}장 선택`;
+
+    photoMoveGuide.textContent =
+        isPhotoMoveMode
+            ? "사진을 놓을 위치를 선택하세요."
+            : "선택한 사진을 한 번에 옮길 수 있어요.";
+
+    moveSelectedPhotosButton.textContent =
+        isPhotoMoveMode
+            ? "이동 취소"
+            : "선택한 사진 이동";
+
+    bottomBlockButtons.hidden =
+        hasSelection;
+
+    addTextBlockButtons.forEach(
+        function(button) {
+            button.disabled =
+                hasSelection;
+        }
+    );
+
+    addImageBlockButtons.forEach(
+        function(button) {
+            button.disabled =
+                hasSelection;
+        }
+    );
+
+}
+
+function createPhotoMoveTarget(
+    targetIndex,
+    label
+) {
+
+    const button =
+        document.createElement("button");
+
+    button.type =
+        "button";
+
+    button.className =
+        "photo-move-target";
+
+    button.dataset.targetIndex =
+        String(targetIndex);
+
+    button.textContent =
+        label || "여기로 이동";
+
+    button.addEventListener(
+        "click",
+        function() {
+            moveSelectedPhotosTo(
+                targetIndex
+            );
+        }
+    );
+
+    return button;
+
+}
+
+function moveSelectedPhotosTo(
+    targetIndex
+) {
+
+    const selectedBlocks =
+        contentBlocks.filter(
+            function(block) {
+                return selectedImageBlocks
+                    .has(block);
+            }
+        );
+
+    if (selectedBlocks.length === 0) {
+        return;
+    }
+
+    let insertionIndex = 0;
+
+    for (
+        let index = 0;
+        index < targetIndex;
+        index++
+    ) {
+
+        if (
+            !selectedImageBlocks.has(
+                contentBlocks[index]
+            )
+        ) {
+            insertionIndex++;
+        }
+
+    }
+
+    const remainingBlocks =
+        contentBlocks.filter(
+            function(block) {
+                return !selectedImageBlocks
+                    .has(block);
+            }
+        );
+
+    contentBlocks = [
+        ...remainingBlocks.slice(
+            0,
+            insertionIndex
+        ),
+        ...selectedBlocks,
+        ...remainingBlocks.slice(
+            insertionIndex
+        )
+    ];
+
+    selectedImageBlocks.clear();
+    isPhotoMoveMode = false;
+
+    renderContentBlocks();
+
+    const firstMovedBlock =
+        contentBlockEditor.querySelector(
+            `.content-block[data-index="${insertionIndex}"]`
+        );
+
+    if (firstMovedBlock) {
+        firstMovedBlock.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest"
+        });
+    }
+
+}
+
+moveSelectedPhotosButton.addEventListener(
+    "click",
+    function() {
+
+        isPhotoMoveMode =
+            !isPhotoMoveMode;
+
+        renderContentBlocks();
+
+    }
+);
+
+clearPhotoSelectionButton.addEventListener(
+    "click",
+    function() {
+
+        selectedImageBlocks.clear();
+        isPhotoMoveMode = false;
+
+        renderContentBlocks();
+
+    }
+);
+
 function renderContentBlocks() {
 
     contentBlockEditor.innerHTML = "";
 
 
+    if (isPhotoMoveMode) {
+        contentBlockEditor.appendChild(
+            createPhotoMoveTarget(
+                0,
+                "맨 위로 이동"
+            )
+        );
+    }
+
+
     contentBlocks.forEach(
         function(block, index) {
+
+            if (
+                isPhotoMoveMode &&
+                index > 0 &&
+                !selectedImageBlocks.has(
+                    block
+                )
+            ) {
+                contentBlockEditor.appendChild(
+                    createPhotoMoveTarget(
+                        index,
+                        "여기로 이동"
+                    )
+                );
+            }
 
             const blockElement =
                 document.createElement("div");
@@ -461,7 +688,20 @@ function renderContentBlocks() {
             blockElement.className =
                 "content-block";
 
-blockElement.draggable = true;
+            const isSelectedImage =
+                block.type === "image" &&
+                selectedImageBlocks.has(
+                    block
+                );
+
+            blockElement.classList.toggle(
+                "is-photo-selected",
+                isSelectedImage
+            );
+
+blockElement.draggable =
+    selectedImageBlocks.size === 0 &&
+    !isPhotoMoveMode;
 
 blockElement.dataset.index = index;
 
@@ -496,6 +736,59 @@ blockElement.dataset.index = index;
 
 
             if (block.type === "image") {
+
+    const selectButton =
+        document.createElement(
+            "button"
+        );
+
+    selectButton.type =
+        "button";
+
+    selectButton.className =
+        "photo-select-button";
+
+    selectButton.setAttribute(
+        "aria-pressed",
+        String(isSelectedImage)
+    );
+
+    selectButton.textContent =
+        isSelectedImage
+            ? "✓ 선택됨"
+            : "사진 선택";
+
+    selectButton.disabled =
+        isPhotoMoveMode;
+
+    selectButton.addEventListener(
+        "click",
+        function() {
+
+            if (
+                selectedImageBlocks.has(
+                    block
+                )
+            ) {
+                selectedImageBlocks.delete(
+                    block
+                );
+            } else {
+                selectedImageBlocks.add(
+                    block
+                );
+            }
+
+            isPhotoMoveMode = false;
+
+            renderContentBlocks();
+
+        }
+    );
+
+    blockElement.appendChild(
+        selectButton
+    );
 
     const image =
         document.createElement(
@@ -593,6 +886,18 @@ blockElement.dataset.index = index;
 
             deleteButton.textContent =
                 "삭제";
+
+            const selectionActive =
+                selectedImageBlocks.size > 0;
+
+            upButton.disabled =
+                selectionActive;
+
+            downButton.disabled =
+                selectionActive;
+
+            deleteButton.disabled =
+                selectionActive;
 
 
             upButton.addEventListener(
@@ -856,6 +1161,17 @@ blockElement.addEventListener(
 
         }
     );
+
+    if (isPhotoMoveMode) {
+        contentBlockEditor.appendChild(
+            createPhotoMoveTarget(
+                contentBlocks.length,
+                "맨 아래로 이동"
+            )
+        );
+    }
+
+    updatePhotoSelectionToolbar();
 
 }
 
@@ -1512,6 +1828,9 @@ async function loadAdminDiaryList() {
 // ==============================
 
 contentBlocks = [];
+
+selectedImageBlocks.clear();
+isPhotoMoveMode = false;
 
 if (
     Array.isArray(

@@ -2013,6 +2013,12 @@ font-family:
     cursor: pointer;
 }
 
+.block-add-button:disabled {
+    cursor: not-allowed;
+
+    opacity: 0.45;
+}
+
 
 .content-block-editor {
     display: flex;
@@ -2034,6 +2040,62 @@ font-family:
     border:
         1px solid
         rgba(151, 130, 167, 0.2);
+}
+
+.content-block.is-photo-selected {
+    border-color:
+        var(--lavender-dark);
+
+    background:
+        rgba(229, 220, 234, 0.48);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(151, 130, 167, 0.12);
+}
+
+.photo-select-button {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 2;
+
+    min-height: 36px;
+
+    padding:
+        8px 12px;
+
+    border:
+        1px solid
+        var(--lavender-dark);
+
+    border-radius: 999px;
+
+    background:
+        rgba(250, 247, 251, 0.94);
+
+    color:
+        var(--lavender-dark);
+
+    box-shadow:
+        0 4px 12px
+        rgba(70, 55, 75, 0.14);
+
+    font-family: inherit;
+    font-size: 12px;
+
+    cursor: pointer;
+}
+
+.is-photo-selected .photo-select-button {
+    background:
+        var(--lavender-dark);
+
+    color: white;
+}
+
+.photo-select-button:disabled {
+    cursor: default;
 }
 
 
@@ -2097,6 +2159,144 @@ font-family:
     font-size: 12px;
 }
 
+.block-action-button:disabled {
+    cursor: not-allowed;
+
+    opacity: 0.4;
+}
+
+.photo-selection-toolbar[hidden] {
+    display: none;
+}
+
+.photo-selection-toolbar {
+    position: sticky;
+    bottom: 12px;
+    z-index: 30;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    margin-top: 16px;
+
+    padding:
+        14px 16px;
+
+    border:
+        1px solid
+        rgba(151, 130, 167, 0.45);
+
+    border-radius: 12px;
+
+    background:
+        rgba(250, 247, 251, 0.96);
+
+    box-shadow:
+        0 10px 28px
+        rgba(70, 55, 75, 0.18);
+
+    backdrop-filter:
+        blur(8px);
+}
+
+.photo-selection-summary {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+.photo-selection-summary strong {
+    color:
+        var(--lavender-dark);
+
+    font-size: 15px;
+}
+
+.photo-selection-summary span {
+    color:
+        var(--soft-text);
+
+    font-size: 12px;
+}
+
+.photo-selection-actions {
+    display: flex;
+
+    gap: 8px;
+}
+
+.photo-selection-actions button {
+    min-height: 40px;
+
+    padding:
+        9px 13px;
+
+    border-radius: 8px;
+
+    font-family: inherit;
+
+    cursor: pointer;
+}
+
+.photo-selection-primary {
+    border:
+        1px solid
+        var(--lavender-dark);
+
+    background:
+        var(--lavender-dark);
+
+    color: white;
+}
+
+.photo-selection-secondary {
+    border:
+        1px solid
+        rgba(151, 130, 167, 0.35);
+
+    background: white;
+
+    color:
+        var(--soft-text);
+}
+
+.photo-move-target {
+    width: 100%;
+
+    min-height: 42px;
+
+    border:
+        1px dashed
+        var(--lavender-dark);
+
+    border-radius: 9px;
+
+    background:
+        rgba(229, 220, 234, 0.3);
+
+    color:
+        var(--lavender-dark);
+
+    font-family: inherit;
+    font-size: 13px;
+
+    cursor: pointer;
+}
+
+.photo-move-target:hover,
+.photo-move-target:focus-visible {
+    background:
+        rgba(199, 182, 209, 0.38);
+
+    outline: none;
+}
+
 @media (max-width: 600px) {
 
     .block-buttons {
@@ -2134,6 +2334,47 @@ font-family:
             rgba(70, 55, 75, 0.12);
 
         backdrop-filter: blur(6px);
+    }
+
+    .photo-select-button {
+        min-height: 44px;
+
+        padding:
+            10px 14px;
+
+        font-size: 13px;
+    }
+
+    .photo-selection-toolbar {
+        bottom: 8px;
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 10px;
+
+        margin-top: 14px;
+
+        padding:
+            12px;
+    }
+
+    .photo-selection-summary {
+        text-align: center;
+    }
+
+    .photo-selection-actions {
+        display: grid;
+
+        grid-template-columns:
+            minmax(0, 1.35fr)
+            minmax(0, 1fr);
+    }
+
+    .photo-selection-actions button,
+    .photo-move-target {
+        min-height: 46px;
     }
 
 }
