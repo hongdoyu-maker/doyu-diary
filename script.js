@@ -1264,6 +1264,11 @@ function openPasswordModal(dateString) {
     passwordInput.value =
         "";
 
+    // 모바일 비밀번호 관리자나 브라우저 자동완성이
+    // 이전의 댓글 삭제 비밀번호를 채우지 못하게 잠시 잠급니다.
+    passwordInput.readOnly =
+        true;
+
     passwordError.classList.remove(
         "show"
     );
@@ -1273,6 +1278,13 @@ function openPasswordModal(dateString) {
     );
 
     setTimeout(function() {
+
+        passwordInput.readOnly =
+            false;
+
+        // 모달이 표시된 뒤 늦게 들어온 자동완성 값도 제거합니다.
+        passwordInput.value =
+            "";
 
         passwordInput.focus();
 
@@ -1352,6 +1364,14 @@ openDiaryButton.addEventListener(
 
             return;
         }
+
+        // 기존 unlock_diary가 확인한 값을 댓글에서도 그대로 사용합니다.
+        // 화면 입력칸은 즉시 비워 자동완성이나 재사용 혼동을 막습니다.
+        openedDiaryPassword =
+            password;
+
+        passwordInput.value =
+            "";
 
 
         const diary =
@@ -1577,9 +1597,6 @@ diaryModal.classList.add(
     "show"
 );
 
-openedDiaryPassword =
-    password;
-
 loadDiaryComments();
 
     }
@@ -1609,6 +1626,9 @@ closePasswordButton.addEventListener(
         passwordModal.classList.remove(
             "show"
         );
+
+        passwordInput.value =
+            "";
 
     }
 );
@@ -1657,6 +1677,9 @@ passwordModal.addEventListener(
             passwordModal.classList.remove(
                 "show"
             );
+
+            passwordInput.value =
+                "";
 
         }
 
