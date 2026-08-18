@@ -150,6 +150,15 @@ const supportedImageExtensions =
         ["image/gif", "gif"]
     ]);
 
+const IMAGE_MAX_DIMENSION =
+    1920;
+
+const JPEG_WEBP_QUALITY =
+    0.86;
+
+const PNG_WEBP_QUALITY =
+    0.9;
+
 function getSupportedImageExtension(file) {
 
     const mimeExtension =
@@ -173,6 +182,206 @@ function getSupportedImageExtension(file) {
     return extensionMatch[1] === "jpeg"
         ? "jpg"
         : extensionMatch[1];
+
+}
+
+async function loadImageForOptimization(file) {
+
+    if ("createImageBitmap" in window) {
+        return createImageBitmap(file);
+    }
+
+    const imageUrl =
+        URL.createObjectURL(file);
+
+    try {
+        const image =
+            new Image();
+
+        image.src =
+            imageUrl;
+
+        await image.decode();
+
+        return image;
+
+    } finally {
+        URL.revokeObjectURL(
+            imageUrl
+        );
+    }
+
+}
+
+function canvasToWebpBlob(
+    canvas,
+    quality
+) {
+
+    return new Promise(
+        function(resolve) {
+            canvas.toBlob(
+                resolve,
+                "image/webp",
+                quality
+            );
+        }
+    );
+
+}
+
+async function optimizeImageFile(file) {
+
+    if (
+        file.type !== "image/jpeg" &&
+        file.type !== "image/png"
+    ) {
+        return {
+            file: file,
+            optimized: false
+        };
+    }
+
+    let sourceImage;
+
+    try {
+        sourceImage =
+            await loadImageForOptimization(
+                file
+            );
+
+        const sourceWidth =
+            sourceImage.width;
+
+        const sourceHeight =
+            sourceImage.height;
+
+        const scale =
+            Math.min(
+                1,
+                IMAGE_MAX_DIMENSION /
+                    Math.max(
+                        sourceWidth,
+                        sourceHeight
+                    )
+            );
+
+        const targetWidth =
+            Math.max(
+                1,
+                Math.round(
+                    sourceWidth * scale
+                )
+            );
+
+        const targetHeight =
+            Math.max(
+                1,
+                Math.round(
+                    sourceHeight * scale
+                )
+            );
+
+        const canvas =
+            document.createElement(
+                "canvas"
+            );
+
+        canvas.width =
+            targetWidth;
+
+        canvas.height =
+            targetHeight;
+
+        const context =
+            canvas.getContext(
+                "2d",
+                {
+                    alpha:
+                        file.type ===
+                        "image/png"
+                }
+            );
+
+        if (!context) {
+            return {
+                file: file,
+                optimized: false
+            };
+        }
+
+        context.imageSmoothingEnabled =
+            true;
+
+        context.imageSmoothingQuality =
+            "high";
+
+        context.drawImage(
+            sourceImage,
+            0,
+            0,
+            targetWidth,
+            targetHeight
+        );
+
+        const optimizedBlob =
+            await canvasToWebpBlob(
+                canvas,
+                file.type === "image/png"
+                    ? PNG_WEBP_QUALITY
+                    : JPEG_WEBP_QUALITY
+            );
+
+        if (
+            !optimizedBlob ||
+            optimizedBlob.size >=
+                file.size * 0.9
+        ) {
+            return {
+                file: file,
+                optimized: false
+            };
+        }
+
+        const baseName =
+            file.name.replace(
+                /\.[^.]+$/,
+                ""
+            );
+
+        return {
+            file: new File(
+                [optimizedBlob],
+                `${baseName}-optimized.webp`,
+                {
+                    type: "image/webp",
+                    lastModified:
+                        file.lastModified
+                }
+            ),
+            optimized: true
+        };
+
+    } catch (error) {
+        console.warn(
+            "사진 최적화를 건너뜁니다:",
+            error
+        );
+
+        return {
+            file: file,
+            optimized: false
+        };
+
+    } finally {
+        if (
+            sourceImage &&
+            typeof sourceImage.close ===
+                "function"
+        ) {
+            sourceImage.close();
+        }
+    }
 
 }
 
@@ -354,7 +563,7 @@ if (block.type === "image") {
                     filePath,
                     file,
                     {
-                        cacheControl: "3600",
+                        cacheControl: "86400",
                         contentType: contentType,
                         upsert: false
                     }
@@ -1606,7 +1815,7 @@ addImageBlockButtons.forEach(
 
                 input.addEventListener(
                     "change",
-                    function(event) {
+                    async function(event) {
 
                         const selectedFiles =
                             Array.from(
@@ -1640,7 +1849,61 @@ addImageBlockButtons.forEach(
                         }
 
 
-                        files.forEach(
+                        addImageBlockButtons.forEach(
+                            function(addButton) {
+                                addButton.disabled =
+                                    true;
+                            }
+                        );
+
+                        diarySaveMessage.textContent =
+                            "사진을 선명하게 유지하며 용량을 줄이는 중...";
+
+                        const optimizedFiles =
+                            [];
+
+                        let originalBytes =
+                            0;
+
+                        let optimizedBytes =
+                            0;
+
+                        let optimizedCount =
+                            0;
+
+                        for (
+                            let i = 0;
+                            i < files.length;
+                            i += 1
+                        ) {
+                            const originalFile =
+                                files[i];
+
+                            originalBytes +=
+                                originalFile.size;
+
+                            diarySaveMessage.textContent =
+                                `사진 최적화 중... (${i + 1}/${files.length})`;
+
+                            const result =
+                                await optimizeImageFile(
+                                    originalFile
+                                );
+
+                            optimizedFiles.push(
+                                result.file
+                            );
+
+                            optimizedBytes +=
+                                result.file.size;
+
+                            if (result.optimized) {
+                                optimizedCount +=
+                                    1;
+                            }
+                        }
+
+                        optimizedFiles.forEach(
                             function(file) {
 
                                 const previewUrl =
@@ -1659,6 +1922,41 @@ addImageBlockButtons.forEach(
 
                             }
                         );
+
+                        addImageBlockButtons.forEach(
+                            function(addButton) {
+                                addButton.disabled =
+                                    false;
+                            }
+                        );
+
+                        if (optimizedCount > 0) {
+                            const savedPercent =
+                                Math.round(
+                                    (1 -
+                                        optimizedBytes /
+                                            originalBytes) *
+                                        100
+                                );
+
+                            diarySaveMessage.textContent =
+                                `사진 ${optimizedCount}장을 최적화했어요. 전체 용량이 약 ${Math.max(0, savedPercent)}% 줄었어요 ♡`;
+
+                        } else if (
+                            files.some(
+                                function(file) {
+                                    return file.type ===
+                                        "image/gif";
+                                }
+                            )
+                        ) {
+                            diarySaveMessage.textContent =
+                                "GIF는 움직임을 유지하기 위해 원본 그대로 추가했어요.";
+
+                        } else {
+                            diarySaveMessage.textContent =
+                                "이미 충분히 작거나 최적화된 사진이라 원본을 유지했어요.";
+                        }
 
 
                         renderContentBlocks();

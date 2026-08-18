@@ -181,6 +181,255 @@ let selectedDate = null;
 let openedDiaryPassword =
     "";
 
+const diaryImageResultCache =
+    new Map();
+
+const DIARY_IMAGE_SESSION_CACHE_KEY =
+    "doyuDiaryImageCache";
+
+function getDiaryImageSessionCache() {
+
+    try {
+        const storedCache =
+            sessionStorage.getItem(
+                DIARY_IMAGE_SESSION_CACHE_KEY
+            );
+
+        return storedCache
+            ? JSON.parse(storedCache)
+            : {};
+
+    } catch (error) {
+        return {};
+    }
+
+}
+
+function saveDiaryImageSessionCache(
+    cache
+) {
+
+    try {
+        sessionStorage.setItem(
+            DIARY_IMAGE_SESSION_CACHE_KEY,
+            JSON.stringify(cache)
+        );
+    } catch (error) {
+        // 저장 공간이 부족하거나 차단되어도 일기 열람은 계속돼요.
+    }
+
+}
+
+function removeDiaryImageCache(
+    dateString
+) {
+
+    diaryImageResultCache.delete(
+        dateString
+    );
+
+    const sessionCache =
+        getDiaryImageSessionCache();
+
+    if (sessionCache[dateString]) {
+        delete sessionCache[dateString];
+        saveDiaryImageSessionCache(
+            sessionCache
+        );
+    }
+
+}
+
+function getSignedUrlExpiration(urlString) {
+
+    try {
+        const token =
+            new URL(
+                urlString
+            ).searchParams.get(
+                "token"
+            );
+
+        if (!token) {
+            return 0;
+        }
+
+        const payloadPart =
+            token.split(".")[1];
+
+        if (!payloadPart) {
+            return 0;
+        }
+
+        const normalized =
+            payloadPart
+                .replace(/-/g, "+")
+                .replace(/_/g, "/")
+                .padEnd(
+                    Math.ceil(
+                        payloadPart.length / 4
+                    ) * 4,
+                    "="
+                );
+
+        const payload =
+            JSON.parse(
+                atob(normalized)
+            );
+
+        return Number(payload.exp)
+            ? Number(payload.exp) * 1000
+            : 0;
+
+    } catch (error) {
+        return 0;
+    }
+
+}
+
+function getDiaryImageCacheExpiration(
+    imageResult
+) {
+
+    const urls = [];
+
+    if (
+        imageResult &&
+        Array.isArray(
+            imageResult.images
+        )
+    ) {
+        urls.push(
+            ...imageResult.images
+        );
+    }
+
+    if (
+        imageResult &&
+        Array.isArray(
+            imageResult.content_blocks
+        )
+    ) {
+        imageResult.content_blocks.forEach(
+            function(block) {
+                if (
+                    block.type === "image" &&
+                    block.url
+                ) {
+                    urls.push(block.url);
+                }
+            }
+        );
+    }
+
+    const now =
+        Date.now();
+
+    const expirations =
+        urls
+            .map(
+                getSignedUrlExpiration
+            )
+            .filter(
+                function(expiration) {
+                    return expiration > now;
+                }
+            );
+
+    const signedUrlExpiration =
+        expirations.length > 0
+            ? Math.min(...expirations) - 30000
+            : now + 60000;
+
+    return Math.min(
+        signedUrlExpiration,
+        now + 10 * 60 * 1000
+    );
+
+}
+
+function getCachedDiaryImageResult(
+    dateString
+) {
+
+    let cached =
+        diaryImageResultCache.get(
+            dateString
+        );
+
+    if (!cached) {
+        const sessionCache =
+            getDiaryImageSessionCache();
+
+        cached =
+            sessionCache[dateString];
+
+        if (cached) {
+            diaryImageResultCache.set(
+                dateString,
+                cached
+            );
+        }
+    }
+
+    if (
+        !cached ||
+        cached.expiresAt <= Date.now()
+    ) {
+        removeDiaryImageCache(
+            dateString
+        );
+        return null;
+    }
+
+    return cached.data;
+
+}
+
+function cacheDiaryImageResult(
+    dateString,
+    imageResult
+) {
+
+    const cacheEntry = {
+        data: imageResult,
+        expiresAt:
+            getDiaryImageCacheExpiration(
+                imageResult
+            )
+    };
+
+    diaryImageResultCache.set(
+        dateString,
+        cacheEntry
+    );
+
+    const sessionCache =
+        getDiaryImageSessionCache();
+
+    Object.keys(
+        sessionCache
+    ).forEach(
+        function(cachedDate) {
+            if (
+                !sessionCache[cachedDate] ||
+                sessionCache[cachedDate].expiresAt <=
+                    Date.now()
+            ) {
+                delete sessionCache[cachedDate];
+            }
+        }
+    );
+
+    sessionCache[dateString] =
+        cacheEntry;
+
+    saveDiaryImageSessionCache(
+        sessionCache
+    );
+
+}
+
 function getCommentClientToken() {
 
     const storageKey =
@@ -1384,34 +1633,48 @@ openDiaryButton.addEventListener(
             data[0];
 diaryImages.innerHTML = "";
 
-console.log("사진 함수 호출 시작");
+const imageDate =
+    selectedDate;
 
-const {
-    data: imageResult,
-    error: imageFunctionError
-} =
-    await supabaseClient.functions.invoke(
-        "get-diary-images",
-        {
-            body: {
-                requested_date:
-                    selectedDate,
-
-                supplied_password:
-                    password
-            }
-        }
+let imageResult =
+    getCachedDiaryImageResult(
+        imageDate
     );
 
-console.log(
-    "사진 함수 결과:",
-    imageResult
-);
+let imageFunctionError =
+    null;
 
-console.log(
-    "사진 함수 오류:",
-    imageFunctionError
-);
+if (!imageResult) {
+    const imageResponse =
+        await supabaseClient.functions.invoke(
+            "get-diary-images",
+            {
+                body: {
+                    requested_date:
+                        imageDate,
+
+                    supplied_password:
+                        password
+                }
+            }
+        );
+
+    imageResult =
+        imageResponse.data;
+
+    imageFunctionError =
+        imageResponse.error;
+
+    if (
+        !imageFunctionError &&
+        imageResult
+    ) {
+        cacheDiaryImageResult(
+            imageDate,
+            imageResult
+        );
+    }
+}
 
 if (imageFunctionError) {
 
@@ -1434,6 +1697,18 @@ if (imageFunctionError) {
                 );
 
             img.src = imageUrl;
+
+            img.addEventListener(
+                "error",
+                function() {
+                    removeDiaryImageCache(
+                        imageDate
+                    );
+                },
+                {
+                    once: true
+                }
+            );
 
             img.loading = "lazy";
 
@@ -1497,6 +1772,18 @@ if (
 
                 img.src =
                     block.url;
+
+                img.addEventListener(
+                    "error",
+                    function() {
+                        removeDiaryImageCache(
+                            imageDate
+                        );
+                    },
+                    {
+                        once: true
+                    }
+                );
 
                 img.loading =
                     "lazy";
