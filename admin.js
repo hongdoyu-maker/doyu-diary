@@ -140,7 +140,43 @@ const homeSettingsMessage =
 let playlistSongs = [];
 
 const diarySaveMessage =
-    document.getElementById("diarySaveMessage");diaryForm.addEventListener(
+    document.getElementById("diarySaveMessage");
+
+const supportedImageExtensions =
+    new Map([
+        ["image/jpeg", "jpg"],
+        ["image/png", "png"],
+        ["image/webp", "webp"],
+        ["image/gif", "gif"]
+    ]);
+
+function getSupportedImageExtension(file) {
+
+    const mimeExtension =
+        supportedImageExtensions.get(
+            String(file.type).toLowerCase()
+        );
+
+    if (mimeExtension) {
+        return mimeExtension;
+    }
+
+    const extensionMatch =
+        String(file.name).toLowerCase().match(
+            /\.(jpe?g|png|webp|gif)$/
+        );
+
+    if (!extensionMatch) {
+        return "";
+    }
+
+    return extensionMatch[1] === "jpeg"
+        ? "jpg"
+        : extensionMatch[1];
+
+}
+
+diaryForm.addEventListener(
     "submit",
     async function(event) {
 
@@ -280,14 +316,24 @@ if (block.type === "image") {
 
 
         const extension =
-            file.name
-                .split(".")
-                .pop()
-                .toLowerCase();
+            getSupportedImageExtension(
+                file
+            );
+
+        if (!extension) {
+            diarySaveMessage.textContent =
+                "JPG, PNG, WEBP, GIF 사진만 올릴 수 있어요.";
+            return;
+        }
 
 
         const fileName =
             `block-${Date.now()}-${i}.${extension}`;
+
+        const contentType =
+            extension === "jpg"
+                ? "image/jpeg"
+                : `image/${extension}`;
 
 
         const filePath =
@@ -309,6 +355,7 @@ if (block.type === "image") {
                     file,
                     {
                         cacheControl: "3600",
+                        contentType: contentType,
                         upsert: false
                     }
                 );
@@ -1550,7 +1597,7 @@ addImageBlockButtons.forEach(
                     "file";
 
                 input.accept =
-                    "image/jpeg,image/png,image/webp";
+                    "image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif";
 
                 // 여러 장 선택 가능
                 input.multiple =
@@ -1561,14 +1608,35 @@ addImageBlockButtons.forEach(
                     "change",
                     function(event) {
 
-                        const files =
+                        const selectedFiles =
                             Array.from(
                                 event.target.files
                             );
 
+                        const files =
+                            selectedFiles.filter(
+                                function(file) {
+                                    return Boolean(
+                                        getSupportedImageExtension(
+                                            file
+                                        )
+                                    );
+                                }
+                            );
+
 
                         if (files.length === 0) {
+                            diarySaveMessage.textContent =
+                                "JPG, PNG, WEBP, GIF 사진만 선택해주세요.";
                             return;
+                        }
+
+                        if (
+                            files.length !==
+                            selectedFiles.length
+                        ) {
+                            diarySaveMessage.textContent =
+                                "지원하지 않는 파일은 제외했어요. JPG, PNG, WEBP, GIF만 가능해요.";
                         }
 
 
