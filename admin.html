@@ -7,7 +7,7 @@
     <title>도유의 일기 · Admin</title>
     <link rel="icon" type="image/png" href="favicon.png">
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=20260818-visible-passwords">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -53,6 +53,9 @@
                     type="password"
                     id="adminPassword"
                     placeholder="••••••••"
+                    autocomplete="current-password"
+                    autocapitalize="none"
+                    spellcheck="false"
                     required
                 >
 
@@ -254,9 +257,12 @@
             </label>
 
             <input
-                type="password"
+                type="text"
                 id="entryPassword"
                 placeholder="이 일기를 열 때 사용할 비밀번호"
+                autocomplete="off"
+                autocapitalize="none"
+                spellcheck="false"
                 required
             >
 

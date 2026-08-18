@@ -62,7 +62,7 @@
         </style>
     </noscript>
 
-    <link rel="stylesheet" href="style.css?v=20260814-diary-navigation">
+    <link rel="stylesheet" href="style.css?v=20260818-visible-passwords">
 </head>
 
 <body>
@@ -262,10 +262,12 @@
         </p>
 
         <input
-            type="password"
+            type="text"
             id="passwordInput"
             placeholder="password"
             autocomplete="off"
+            autocapitalize="none"
+            spellcheck="false"
         >
 
         <button class="open-button" id="openDiary">
@@ -380,11 +382,13 @@
                         </label>
 
                         <input
-                            type="password"
+                            type="text"
                             id="commentDeletePassword"
                             minlength="4"
                             maxlength="30"
                             autocomplete="new-password"
+                            autocapitalize="none"
+                            spellcheck="false"
                             placeholder="4자 이상"
                             required
                         >
