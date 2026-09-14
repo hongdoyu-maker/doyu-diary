@@ -175,6 +175,90 @@ let diaryDates = [];
 let currentYear;
 let currentMonth;
 
+let calendarFollowsToday =
+    true;
+
+let lastKnownTodayYear;
+let lastKnownTodayMonth;
+
+function getTodayCalendarPeriod() {
+
+    const today =
+        new Date();
+
+    return {
+        year: today.getFullYear(),
+        month: today.getMonth()
+    };
+
+}
+
+function showCurrentCalendarMonth() {
+
+    const todayPeriod =
+        getTodayCalendarPeriod();
+
+    currentYear =
+        todayPeriod.year;
+
+    currentMonth =
+        todayPeriod.month;
+
+    lastKnownTodayYear =
+        todayPeriod.year;
+
+    lastKnownTodayMonth =
+        todayPeriod.month;
+
+    calendarFollowsToday =
+        true;
+
+    createMonthList();
+
+    renderCalendar(
+        currentYear,
+        currentMonth
+    );
+
+}
+
+function syncCalendarWithToday() {
+
+    const todayPeriod =
+        getTodayCalendarPeriod();
+
+    if (
+        todayPeriod.year ===
+            lastKnownTodayYear &&
+        todayPeriod.month ===
+            lastKnownTodayMonth
+    ) {
+        return;
+    }
+
+    lastKnownTodayYear =
+        todayPeriod.year;
+
+    lastKnownTodayMonth =
+        todayPeriod.month;
+
+    if (calendarFollowsToday) {
+        currentYear =
+            todayPeriod.year;
+
+        currentMonth =
+            todayPeriod.month;
+    }
+
+    createMonthList();
+
+    renderCalendar(
+        currentYear,
+        currentMonth
+    );
+
+}
+
 // 현재 선택한 일기 날짜
 let selectedDate = null;
 
@@ -988,6 +1072,9 @@ try {
 
 async function loadDiaryDates() {
 
+    // 일기 유무와 관계없이 오늘이 속한 달을 즉시 보여줘요.
+    showCurrentCalendarMonth();
+
     const {
         data,
         error
@@ -1007,36 +1094,14 @@ async function loadDiaryDates() {
 
 
     diaryDates =
-        data.map(function(item) {
+        (Array.isArray(data)
+            ? data
+            : []
+        ).map(function(item) {
             return item.entry_date;
         });
 
-
-    if (diaryDates.length === 0) {
-
-        calendarMonth.textContent =
-            "No Diary";
-
-        return;
-    }
-
-
     createMonthList();
-
-
-    // 가장 최근 일기가 있는 달을 처음 보여주기
-    const latestDate =
-        diaryDates[diaryDates.length - 1];
-
-    const parts =
-        latestDate.split("-");
-
-    currentYear =
-        Number(parts[0]);
-
-    currentMonth =
-        Number(parts[1]) - 1;
-
 
     renderCalendar(
         currentYear,
@@ -1228,6 +1293,22 @@ function createMonthList() {
 
     const months = new Set();
 
+    const todayPeriod =
+        getTodayCalendarPeriod();
+
+    months.add(
+        `${todayPeriod.year}-${todayPeriod.month}`
+    );
+
+    if (
+        Number.isInteger(currentYear) &&
+        Number.isInteger(currentMonth)
+    ) {
+        months.add(
+            `${currentYear}-${currentMonth}`
+        );
+    }
+
 
     diaryDates.forEach(function(date) {
 
@@ -1249,7 +1330,29 @@ function createMonthList() {
 
 
     Array.from(months)
-        .sort()
+        .sort(function(a, b) {
+
+            const [
+                aYear,
+                aMonth
+            ] = a
+                .split("-")
+                .map(Number);
+
+            const [
+                bYear,
+                bMonth
+            ] = b
+                .split("-")
+                .map(Number);
+
+            return (
+                aYear * 12 + aMonth
+            ) - (
+                bYear * 12 + bMonth
+            );
+
+        })
         .forEach(function(value) {
 
             const [
@@ -1285,6 +1388,15 @@ function createMonthList() {
 
                     currentMonth =
                         month;
+
+                    const todayPeriod =
+                        getTodayCalendarPeriod();
+
+                    calendarFollowsToday =
+                        year ===
+                            todayPeriod.year &&
+                        month ===
+                            todayPeriod.month;
 
                     renderCalendar(
                         year,
@@ -2008,3 +2120,22 @@ passwordModal.addEventListener(
 
 loadDiaryDates();
 loadHomeSettings();
+
+window.addEventListener(
+    "focus",
+    syncCalendarWithToday
+);
+
+document.addEventListener(
+    "visibilitychange",
+    function() {
+        if (!document.hidden) {
+            syncCalendarWithToday();
+        }
+    }
+);
+
+setInterval(
+    syncCalendarWithToday,
+    60 * 1000
+);
